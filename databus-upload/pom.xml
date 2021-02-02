@@ -18,7 +18,7 @@
     <artifactId>common-metadata</artifactId>
 
     <!-- version for all artifacts, part of the uri, can be overriden in artifact pom -->
-    <version>2018.08.15</version>
+    <version>2020.08.01</version>
     
     <!-- includes child directories, has to match the folder names of your upload -->
     <modules>
@@ -34,14 +34,14 @@
 
         <!-- This is where your data should be accessible -->
         <databus.downloadUrlPath>
-            http://downloads.dbpedia.org/repo/${project.groupId}/${project.artifactId}/${project.version}/
+		https://raw.githubusercontent.com/JJ-Author/stack-tutorial-resources/feb8f5ba78bfc8d21bc2ce28c3377ad2632bfb16/databus-upload/cities/2020.07.01/cities.ttl 
         </databus.downloadUrlPath>
      
         <!-- your webid URI here-->
-        <databus.publisher>https://neradis.github.io/test-id.ttl#this</databus.publisher>
+	<databus.publisher>https://jj-author.github.io/demo-webid.ttl#this</databus.publisher>
 
         <!-- path to your certificate -->
-        <databus.pkcs12File>test-cert-bundle.p12</databus.pkcs12File>
+        <databus.pkcs12File>certificate_demo-account.pfx</databus.pkcs12File>
 
 
         <databus.license>http://purl.oclc.org/NET/rdflicense/cc-by-sa3.0</databus.license>

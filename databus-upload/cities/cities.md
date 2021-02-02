@@ -1,4 +1,3 @@
-
 # Cities dataset
 Data fetched from dbpedia.org about large cities (population higher than 3 million). 
 

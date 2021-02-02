@@ -3,7 +3,7 @@
     <parent>
 	    <groupId>stack-tutorial</groupId> <!-- needs to match parent pom -->
         <artifactId>common-metadata</artifactId>  <!-- needs to match parent pom -->
-        <version>2020.07.01</version> <!-- needs to match parent pom -->
+        <version>2020.08.01</version> <!-- needs to match parent pom -->
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -13,7 +13,7 @@
 
 
     <!-- artifact version could be overriden here -->
-    <version>2020.07.01</version>
+    <version>2020.08.01</version>
 
     <!-- properties could be overriden here -->
     <properties>
