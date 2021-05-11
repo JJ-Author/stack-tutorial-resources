@@ -16,12 +16,6 @@ indexConfig:
         SELECT ?resource ?comment WHERE {
           ?resource <http://www.w3.org/2000/01/rdf-schema#comment> ?comment.
         }
-    - fieldName: typeName
-      resourceName: resource
-      query: >
-        SELECT ?resource (REPLACE(STR(?type), "(.*)(/|#)", "") AS ?typeName) WHERE{
-          ?resource a ?type.
-        }
     - fieldName: type
       resourceName: resource
       fieldType : stored
