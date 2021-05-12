@@ -1,71 +1,35 @@
 version: "1.0"
 indexConfig:
-  indexPath: /root/index
-  cacheSize: 1000000
-  commitInterval: 10000000
+  indexPath: /root/lucene-index
+  cacheSize: 100000
+  commitInterval: 100000
   indexFields:
     - fieldName: label
-      resourceName: resource
+      resourceName: group
       query: >
-        SELECT ?resource ?label WHERE {
-          ?resource <http://www.w3.org/2000/01/rdf-schema#label> ?label.
+        SELECT DISTINCT ?group ?label  WHERE {
+          ?group <http://www.w3.org/2000/01/rdf-schema#label> ?label .
         }
     - fieldName: comment
-      resourceName: resource
+      resourceName: group
       query: >
-        SELECT ?resource ?comment WHERE {
-          ?resource <http://www.w3.org/2000/01/rdf-schema#comment> ?comment.
+        SELECT DISTINCT ?group ?comment WHERE {
+          ?group <http://www.w3.org/2000/01/rdf-schema#comment> ?comment.
         }
-    - fieldName: type
-      resourceName: resource
-      fieldType : stored
-      query: >
-        SELECT DISTINCT ?resource ?type WHERE{
-          ?resource a ?type.
-        }
-    - fieldName: category
-      fieldType: stored
-      resourceName: resource
-      query: >
-        SELECT DISTINCT ?resource ?category WHERE {
-          ?resource <http://purl.org/dc/terms/subject> ?category .
-        }
-    - fieldName: refCount
-      resourceName: resource
-      fieldType: numeric
-      query: >
-        SELECT ?resource (COUNT(?s) as ?refCount) WHERE {
-          ?s ?p ?resource .
-          FILTER(!isLiteral(?resource))
-        } GROUP BY ?resource
 queryConfig:
   exactMatchBoost: 5
   prefixMatchBoost: 2
   fuzzyMatchBoost: 1
   fuzzyEditDistance: 2
   fuzzyPrefixLength: 2
-  boostFormula: 0.1*ln(refCount+1)+1
   maxResults: 100
-  format: XML
-  formatTemplate: /root/template.xsl
-  minRelevanceScore: 0.1
+  format: JSON
   queryFields:
     - fieldName: label
-      weight: 10
-      highlight: true
-      queryByDefault: true
-    - fieldName: category
-      weight: 1
+      weight: 2.0
       highlight: true
       queryByDefault: true
     - fieldName: comment
-      weight: 3
+      weight: 0.2
       highlight: true
       queryByDefault: true
-    - fieldName: typeName
-      weight: 0.1
-      highlight: false
-      required: true
-      exact: true
-      aliases:
-        - QueryClass
