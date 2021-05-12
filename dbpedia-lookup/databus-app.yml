@@ -1,0 +1,160 @@
+version: "1.0"
+indexConfig:
+  indexPath: /root/lucene-index
+  cacheSize: 100000
+  commitInterval: 100000
+  indexFields:
+    - fieldName: label
+      resourceName: publisher
+      query: >
+        SELECT DISTINCT ?publisher ?label WHERE {
+          ?publisher ^<http://xmlns.com/foaf/0.1/account> ?webid .
+          ?webid <http://xmlns.com/foaf/0.1/name> ?label .
+          ?dataset <http://purl.org/dc/terms/publisher> ?webid .
+        }
+    - fieldName: label
+      resourceName: group
+      query: >
+        SELECT DISTINCT ?group ?label  WHERE {
+          ?group a <http://dataid.dbpedia.org/ns/core#Group> .
+          ?group <http://www.w3.org/2000/01/rdf-schema#label> ?label .
+        }
+    - fieldName: artifactData
+      resourceName: group
+      query: >
+        SELECT DISTINCT ?group ?artifactData WHERE {
+          ?group ^<http://dataid.dbpedia.org/ns/core#group> ?dataset .
+          ?artifactUri ^<http://dataid.dbpedia.org/ns/core#artifact> ?dataset .
+          ?dataset <http://www.w3.org/2000/01/rdf-schema#label> ?label .
+          BIND(CONCAT(STR(?artifactUri), "#", STR(?label)) AS ?artifactData) .
+        }
+    - fieldName: comment
+      resourceName: group
+      query: >
+        SELECT DISTINCT ?group ?comment WHERE {
+          ?group a <http://dataid.dbpedia.org/ns/core#Group> .
+          ?group <http://www.w3.org/2000/01/rdf-schema#comment> ?comment.
+        }
+    - fieldName: publisherLabel
+      resourceName: resource
+      query: >
+        SELECT DISTINCT ?resource ?publisherLabel WHERE {
+          ?resource ^<http://dataid.dbpedia.org/ns/core#artifact>|^<http://dataid.dbpedia.org/ns/core#group> ?dataset .
+          ?dataset <http://purl.org/dc/terms/publisher> ?webid.
+          ?webid <http://xmlns.com/foaf/0.1/name> ?publisherLabel .
+        }
+    - fieldName: publisherUri
+      resourceName: resource
+      fieldType: string
+      query: >
+        SELECT DISTINCT ?resource ?publisherUri WHERE {
+          ?resource ^<http://dataid.dbpedia.org/ns/core#artifact>|^<http://dataid.dbpedia.org/ns/core#group> ?dataset .
+          ?dataset <http://purl.org/dc/terms/publisher> ?webid.
+          ?webid <http://xmlns.com/foaf/0.1/account> ?publisherUri .
+        }
+    - fieldName: label
+      resourceName: artifact
+      query: >
+        SELECT DISTINCT ?artifact ?label WHERE {
+          ?artifact ^<http://dataid.dbpedia.org/ns/core#artifact> ?dataset .
+          ?dataset <http://www.w3.org/2000/01/rdf-schema#label> ?label.
+                    ?dataset <http://purl.org/dc/terms/hasVersion> ?v
+        } ORDER BY DESC(?v)
+    - fieldName: comment
+      resourceName: artifact
+      query: >
+        SELECT DISTINCT ?artifact ?comment WHERE {
+          ?artifact ^<http://dataid.dbpedia.org/ns/core#artifact> ?dataset .
+          ?dataset <http://www.w3.org/2000/01/rdf-schema#comment> ?comment.
+          ?dataset <http://purl.org/dc/terms/hasVersion> ?v
+        } ORDER BY DESC(?v)
+    - fieldName: typeName
+      resourceName: resource
+      query: >
+        SELECT DISTINCT ?resource (REPLACE(STR(?type), "(.*)(/|#)", "") AS ?typeName) WHERE {
+          ?resource a ?type.
+          VALUES ?type { <http://dataid.dbpedia.org/ns/core#Artifact> <https://databus.dbpedia.org/system/voc/Service> <http://dataid.dbpedia.org/ns/core#Group> }
+        }
+    - fieldName: typeName
+      resourceName: resource
+      query: >
+        SELECT DISTINCT ?resource ("Publisher" AS ?typeName) WHERE {
+          ?dataset <http://purl.org/dc/terms/publisher> ?webid.
+          ?webid <http://xmlns.com/foaf/0.1/account> ?resource.
+          ?webid a ?type.
+        }
+    - fieldName: groupUri
+      resourceName: artifact
+      fieldType: string
+      query: >
+        SELECT DISTINCT ?artifact ?groupUri WHERE {
+          ?artifact ^<http://dataid.dbpedia.org/ns/core#artifact> ?dataset .
+          ?dataset <http://dataid.dbpedia.org/ns/core#group> ?groupUri.
+        }
+    - fieldName: label
+      resourceName: service
+      query: >
+        SELECT DISTINCT ?service ?label WHERE {
+          ?service a <https://databus.dbpedia.org/system/voc/Service> .
+          ?service <http://purl.org/dc/terms/title> ?label .
+        }
+    - fieldName: comment
+      resourceName: service
+      query: >
+        SELECT DISTINCT ?service ?comment WHERE {
+          ?service a <https://databus.dbpedia.org/system/voc/Service> .
+          ?service <http://purl.org/dc/terms/abstract> ?comment .
+        }
+    - fieldName: uriPart
+      resourceName: uri
+      query: >
+        SELECT DISTINCT ?uri ?uriPart WHERE {
+          ?uri ^<http://dataid.dbpedia.org/ns/core#artifact>|^<http://dataid.dbpedia.org/ns/core#group>|^<http://xmlns.com/foaf/0.1/account> ?o .
+          BIND(STR(?uri) AS ?uriStr) .
+          ?uriPart <http://jena.hpl.hp.com/ARQ/property#strSplit> (?uriStr "/") .
+          FILTER(?uriPart != "")
+          FILTER(?uriPart != "https:")
+          FILTER(?uriPart != "http:")
+          FILTER(?uriPart != "databus.dbpedia.org")
+        }
+queryConfig:
+  exactMatchBoost: 5
+  prefixMatchBoost: 2
+  fuzzyMatchBoost: 1
+  fuzzyEditDistance: 2
+  fuzzyPrefixLength: 2
+  maxResults: 100
+  format: JSON
+  queryFields:
+    - fieldName: label
+      weight: 2.0
+      highlight: true
+      queryByDefault: true
+    - fieldName: publisherLabel
+      weight: 0.15
+      highlight: true
+      queryByDefault: true
+    - fieldName: comment
+      weight: 0.2
+      highlight: true
+      queryByDefault: true
+    - fieldName: typeName
+      weight: 0.0
+      highlight: false
+      required: true
+    - fieldName: groupUri
+      weight: 0.0
+      highlight: false
+      required: true
+      exact: true
+      tokenize: false
+    - fieldName: publisherUri
+      weight: 0.0
+      highlight: false
+      required: true
+      exact: true
+      tokenize: false
+    - fieldName: uriPart
+      weight: 0.8
+      highlight: false
+      queryByDefault: true
